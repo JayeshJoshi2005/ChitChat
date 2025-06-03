@@ -26,7 +26,9 @@ const ProfilePage = () => {
         <div className="bg-base-300 rounded-2xl shadow-md p-6 md:p-10 space-y-8">
           <div className="text-center">
             <h1 className="text-3xl font-bold">Your Profile</h1>
-            <p className="text-sm text-zinc-400 mt-1">Manage your personal information</p>
+            <p className="text-sm text-zinc-400 mt-1">
+              Manage your personal information
+            </p>
           </div>
 
           {/* Avatar Upload */}
@@ -41,7 +43,9 @@ const ProfilePage = () => {
                 htmlFor="avatar-upload"
                 className={`absolute bottom-0 right-0 bg-base-content p-2 rounded-full cursor-pointer 
                   transition-all duration-200 hover:scale-110 border-2 border-base-100
-                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}`}
+                  ${
+                    isUpdatingProfile ? "animate-pulse pointer-events-none" : ""
+                  }`}
               >
                 <Camera className="w-5 h-5 text-base-200" />
                 <input
@@ -55,7 +59,9 @@ const ProfilePage = () => {
               </label>
             </div>
             <p className="text-xs text-zinc-400">
-              {isUpdatingProfile ? "Uploading..." : "Click the camera to update"}
+              {isUpdatingProfile
+                ? "Uploading..."
+                : "Click the camera to update"}
             </p>
           </div>
 
@@ -83,13 +89,9 @@ const ProfilePage = () => {
           </div>
 
           {/* Account Info */}
-          <div className="bg-base-200 rounded-xl p-5">
-            <h2 className="text-lg font-semibold mb-3">Account Information</h2>
-            <div className="space-y-3 text-sm divide-y divide-zinc-700/50">
-              <div className="flex items-center justify-between py-2">
-                <span>Member Since</span>
-                <span>{authUser.createdAt?.split("T")[0]}</span>
-              </div>
+          <div className="bg-base-200 rounded-xl p-3">
+           
+            <div className="text-sm">
               <div className="flex items-center justify-between py-2">
                 <span>Account Status</span>
                 <span className="text-green-500 font-medium">Active</span>
