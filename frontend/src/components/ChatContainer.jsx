@@ -11,21 +11,29 @@ const ChatContainer = () => {
   const {
     messages,
     getMessages,
+    getGroupMessages,
     isMessagesLoading,
     selectedUser,
+    selectedGroup,
     subscribeToMessages,
+    subscribeToGroupMessages,
     unsubscribeFromMessages,
+    unsubscribeFromGroupMessages,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
 
   useEffect(() => {
-    getMessages(selectedUser._id);
-
-    subscribeToMessages();
-
-    return () => unsubscribeFromMessages();
-  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+    if (selectedUser) {
+      getMessages(selectedUser._id);
+      subscribeToMessages();
+      return () => unsubscribeFromMessages();
+    } else if (selectedGroup) {
+      getGroupMessages(selectedGroup._id);
+      subscribeToGroupMessages();
+      return () => unsubscribeFromGroupMessages();
+    }
+  }, [selectedUser, selectedGroup, getMessages, getGroupMessages, subscribeToMessages, subscribeToGroupMessages, unsubscribeFromMessages, unsubscribeFromGroupMessages]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -60,13 +68,18 @@ const ChatContainer = () => {
                   src={
                     message.senderId === authUser._id
                       ? authUser.profilePic || "/avatar.png"
-                      : selectedUser.profilePic || "/avatar.png"
+                      : (selectedUser ? selectedUser.profilePic : message.senderId?.profilePic) || "/avatar.png"
                   }
                   alt="profile pic"
                 />
               </div>
             </div>
             <div className="chat-header mb-1">
+              {selectedGroup && message.senderId !== authUser._id && (
+                <span className="text-xs font-medium mr-2">
+                  {message.senderId?.fullName}
+                </span>
+              )}
               <time className="text-xs opacity-50 ml-1">
                 {formatMessageTime(message.createdAt)}
               </time>

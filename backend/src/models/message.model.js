@@ -7,21 +7,23 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
     },
-    text: {
-      type: String,
+
+    groupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Group",
+      default: null,
     },
-    image: {
-      type: String,
-    },
+
+    text: String,
+    image: String,
   },
   { timestamps: true }
 );
 
-const Message = mongoose.model("Message", messageSchema);
-
-export default Message;
+export default mongoose.model("Message", messageSchema);

@@ -3,8 +3,10 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 
 const ChatHeader = () => {
-  const { selectedUser, setSelectedUser } = useChatStore();
+  const { selectedUser, setSelectedUser, selectedGroup, setSelectedGroup } = useChatStore();
   const { onlineUsers } = useAuthStore();
+
+  const chatEntity = selectedUser || selectedGroup;
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -13,21 +15,24 @@ const ChatHeader = () => {
           {/* Avatar */}
           <div className="avatar">
             <div className="size-10 rounded-full relative">
-              <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.fullName} />
+              <img src={chatEntity.profilePic || chatEntity.groupPic || "/avatar.png"} alt={chatEntity.fullName || chatEntity.name} />
             </div>
           </div>
 
-          {/* User info */}
+          {/* User/Group info */}
           <div>
-            <h3 className="font-medium">{selectedUser.fullName}</h3>
+            <h3 className="font-medium">{chatEntity.fullName || chatEntity.name}</h3>
             <p className="text-sm text-base-content/70">
-              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+              {selectedUser ? (onlineUsers.includes(selectedUser._id) ? "Online" : "Offline") : `${chatEntity.members?.length || 0} members`}
             </p>
           </div>
         </div>
 
         {/* Close button */}
-        <button onClick={() => setSelectedUser(null)}>
+        <button onClick={() => {
+          if (selectedUser) setSelectedUser(null);
+          if (selectedGroup) setSelectedGroup(null);
+        }}>
           <X />
         </button>
       </div>

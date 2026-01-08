@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import Group from "../models/group.model.js";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
@@ -35,6 +36,26 @@ export const getMessages = async (req, res) => {
   }
 };
 
+export const getGroupMessages = async (req, res) => {
+  try {
+    const { id: groupId } = req.params;
+    const myId = req.user._id;
+
+    // Check if user is member of the group
+    const group = await Group.findById(groupId);
+    if (!group || !group.members.includes(myId)) {
+      return res.status(403).json({ message: "Not authorized to view this group" });
+    }
+
+    const messages = await Message.find({ groupId }).populate("senderId", "fullName profilePic");
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.log("Error in getGroupMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const sendMessage = async (req, res) => {
   try {
     const { text, image } = req.body;
@@ -65,6 +86,52 @@ export const sendMessage = async (req, res) => {
     res.status(201).json(newMessage);
   } catch (error) {
     console.log("Error in sendMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const sendGroupMessage = async (req, res) => {
+  try {
+    const { text, image } = req.body;
+    const { id: groupId } = req.params;
+    const senderId = req.user._id;
+
+    // Check if user is member of the group
+    const group = await Group.findById(groupId);
+    if (!group || !group.members.includes(senderId)) {
+      return res.status(403).json({ message: "Not authorized to send message to this group" });
+    }
+
+    let imageUrl;
+    if (image) {
+      // Upload base64 image to cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      imageUrl = uploadResponse.secure_url;
+    }
+
+    const newMessage = new Message({
+      senderId,
+      groupId,
+      text,
+      image: imageUrl,
+    });
+
+    await newMessage.save();
+
+    // Populate sender info
+    await newMessage.populate("senderId", "fullName profilePic");
+
+    // Emit to all group members
+    group.members.forEach((memberId) => {
+      const memberSocketId = getReceiverSocketId(memberId.toString());
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("newGroupMessage", newMessage);
+      }
+    });
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.log("Error in sendGroupMessage controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
