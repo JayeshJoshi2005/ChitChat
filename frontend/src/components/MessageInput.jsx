@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Send, X } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Image, Send, X, Video } from "lucide-react";
 import toast from "react-hot-toast";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage, sendGroupMessage, selectedUser } = useChatStore();
+  const { sendMessage, sendGroupMessage, selectedUser, selectedGroup } = useChatStore();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -45,6 +46,24 @@ const MessageInput = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
+    }
+  };
+
+  const handleVideoCall = () => {
+    if (!selectedUser && !selectedGroup) {
+      toast.error("Select a chat to start a video call");
+      return;
+    }
+    const socket = useAuthStore.getState().socket;
+    if (!socket || !socket.connected) {
+      toast.error("Not connected to server");
+      return;
+    }
+    console.log("Starting video call", { selectedUser: selectedUser?._id, selectedGroup: selectedGroup?._id });
+    if (selectedGroup) {
+      socket.emit("startVideoCall", { groupId: selectedGroup._id });
+    } else if (selectedUser) {
+      socket.emit("startVideoCall", { userId: selectedUser._id });
     }
   };
 
@@ -94,6 +113,14 @@ const MessageInput = () => {
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-circle text-zinc-400"
+            onClick={handleVideoCall}
+          >
+            <Video size={20} />
           </button>
         </div>
         <button

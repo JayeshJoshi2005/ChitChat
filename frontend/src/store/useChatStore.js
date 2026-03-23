@@ -88,8 +88,16 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      console.log("Received newMessage", newMessage, "selectedUser", selectedUser._id);
+      
+      // Handle ObjectId/string comparison
+      const senderId = typeof newMessage.senderId === 'object' ? newMessage.senderId._id || newMessage.senderId : newMessage.senderId;
+      const receiverId = newMessage.receiverId ? (typeof newMessage.receiverId === 'object' ? newMessage.receiverId._id || newMessage.receiverId : newMessage.receiverId) : null;
+      const selectedUserId = selectedUser._id;
+      
+      const isMessageForSelectedUser = senderId?.toString() === selectedUserId?.toString() || receiverId?.toString() === selectedUserId?.toString();
+      console.log("Message match:", { senderId, receiverId, selectedUserId, isMessageForSelectedUser });
+      if (!isMessageForSelectedUser) return;
 
       set({
         messages: [...get().messages, newMessage],
@@ -104,6 +112,7 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newGroupMessage", (newMessage) => {
+      console.log("Received newGroupMessage", newMessage);
       if (newMessage.groupId !== selectedGroup._id) return;
 
       set({

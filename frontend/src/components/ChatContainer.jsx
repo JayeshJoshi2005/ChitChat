@@ -92,7 +92,25 @@ const ChatContainer = () => {
                   className="sm:max-w-[200px] rounded-md mb-2"
                 />
               )}
-              {message.text && <p>{message.text}</p>}
+              {message.text && (
+                <p>
+                  {message.text?.includes("Video call started:") ? (
+                    <a
+                      href={(() => {
+                        const path = message.text.split("Video call started:")[1]?.trim() || "";
+                        return path.startsWith("http") ? path : `${window.location.origin}${path.startsWith("/") ? "" : "/"}${path}`;
+                      })()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:opacity-80 font-medium"
+                    >
+                      📹 Join Video Call
+                    </a>
+                  ) : (
+                    message.text
+                  )}
+                </p>
+              )}
             </div>
           </div>
         ))}
