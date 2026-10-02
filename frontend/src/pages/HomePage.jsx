@@ -1,24 +1,21 @@
 import { useChatStore } from "../store/useChatStore";
-
 import Sidebar from "../components/Sidebar";
 import NoChatSelected from "../components/NoChatSelected";
 import ChatContainer from "../components/ChatContainer";
-
+import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
 const HomePage = () => {
   const { selectedUser, selectedGroup } = useChatStore();
-
+  const subscribeToTyping = useChatStore((state) => state.subscribeToTyping);
+  const socket = useAuthStore((state) => state.socket);
+  useEffect(() => subscribeToTyping(socket), [socket, subscribeToTyping]);
   return (
-    <div className="h-[96vh] bg-base-200">
-      <div className="flex items-center justify-center pt-20 px-4">
-        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
-          <div className="flex h-full rounded-lg overflow-hidden">
-            <Sidebar />
-
-            {(!selectedUser && !selectedGroup) ? <NoChatSelected /> : <ChatContainer />}
-          </div>
-        </div>
+    <main className="mx-auto h-[calc(100dvh-4.5rem)] max-w-[1440px] p-2 sm:p-5 lg:p-6">
+      <div className="surface flex h-full min-h-0 overflow-hidden rounded-2xl sm:rounded-3xl">
+        <Sidebar />
+        {!selectedUser && !selectedGroup ? <NoChatSelected /> : <ChatContainer />}
       </div>
-    </div>
+    </main>
   );
 };
 export default HomePage;

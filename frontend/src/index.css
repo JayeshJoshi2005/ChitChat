@@ -4,6 +4,58 @@
 
 @layer base {
   html {
-    font-family: 'Edu SA Hand', cursive;
+    font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body { margin: 0; }
+  button, input, textarea { font: inherit; }
+  ::selection { background: oklch(var(--p) / 0.2); }
+  :focus-visible { outline: 2px solid oklch(var(--p)); outline-offset: 4px; }
+  * { scrollbar-width: thin; scrollbar-color: oklch(var(--bc) / 0.2) transparent; }
+}
+
+@layer components {
+  .app-shell { @apply min-h-screen bg-base-200 text-base-content; }
+  .surface { @apply rounded-3xl border border-base-content/10 bg-base-100 shadow-sm; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-primary; }
+  .btn { @apply rounded-xl font-medium normal-case; }
+  .input { @apply rounded-xl; }
+  .auth-input { @apply input input-bordered h-12 w-full bg-base-100 pl-11 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15; }
+  .auth-panel {
+    background-image: radial-gradient(ellipse at 20% 10%, oklch(var(--p) / 0.15), transparent 55%), radial-gradient(ellipse at 90% 90%, oklch(var(--s) / 0.13), transparent 55%);
+  }
+  .dot-pattern {
+    background-image: radial-gradient(oklch(var(--bc) / 0.12) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .chat-texture {
+    background-image: radial-gradient(oklch(var(--bc) / 0.035) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .call-tile { @apply relative min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-slate-800; }
+  .call-control { @apply btn h-11 min-h-11 w-11 border-white/10 bg-white/10 text-white hover:border-white/20 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30 sm:h-12 sm:min-h-12 sm:w-12; }
+  .page-enter { animation: page-enter 350ms ease-out both; }
+  .typing-dot { @apply size-1.5 rounded-full bg-current; animation: typing-dot 1.2s ease-in-out infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 150ms; }
+  .typing-dot:nth-child(3) { animation-delay: 300ms; }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

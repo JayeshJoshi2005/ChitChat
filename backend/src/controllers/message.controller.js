@@ -8,9 +8,20 @@ import { getReceiverSocketId, io } from "../lib/socket.js";
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
-
-    res.status(200).json(filteredUsers);
+    const [filteredUsers, activity] = await Promise.all([
+      User.find({ _id: { $ne: loggedInUserId } }).select("-password").lean(),
+      Message.aggregate([
+        { $match: { groupId: null, $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }] } },
+        { $group: {
+          _id: { $cond: [{ $eq: ["$senderId", loggedInUserId] }, "$receiverId", "$senderId"] },
+          lastMessageAt: { $max: "$createdAt" },
+        } },
+      ]),
+    ]);
+    const lastMessageByUser = new Map(activity.map((item) => [String(item._id), item.lastMessageAt]));
+    res.status(200).json(filteredUsers.map((user) => ({
+      ...user, lastMessageAt: lastMessageByUser.get(String(user._id)) || null,
+    })));
   } catch (error) {
     console.error("Error in getUsersForSidebar: ", error.message);
     res.status(500).json({ error: "Internal server error" });
